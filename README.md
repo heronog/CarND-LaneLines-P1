@@ -33,7 +33,9 @@ This allows the image to be represented in a bidimensional matrix instead of a t
 
 ##### 2.- the contrast of the image is increased
 In preparation for the next step, a higher contrast means for a more steep gradient field across the image.
+
 This is done by detecting creating a second matrix that corresponds to the image, but with a binary bit that indicates if the value in the image passes a provided threshold or not. This secondary image is then alpha blended into the original image.
+
 The result is an image where darker areas are darker and brighter areas are darker, increasing the local gradient.
 ![contrast adjusted][image4]
 
@@ -45,11 +47,13 @@ The image is passed through the Canny transform to detect where the local gradie
 ![canny transform][image5]
 
 ##### 5.- Relevant Area Mask
-An image mask is applied leaving information only in a relevant area of interest. This step can not be applied before the canny transform to reduce the information that has to be processed,  this is because the gradient between the mask and the rest of the image would be detected as an edge by the Canny transform.
+An image mask is applied leaving information only in a relevant area of interest.
+
+This step can not be applied before the canny transform to reduce the information that has to be processed, because the gradient between the mask and the rest of the image would be detected as an edge by the Canny transform.
 ![masked image][image6]
 
 ##### 6.- The Hough transform
-    The Hough transform is used on the image, resulting in a list of (x1, y1, x2, y2) points representing start and end points of lines.
+The Hough transform is used on the image, resulting in a list of (x1, y1, x2, y2) points representing start and end points of lines.
 ![hough lines][image7]
 
 ##### 7.- Simplification
