@@ -36,7 +36,7 @@ In preparation for the next step, a higher contrast means for a more steep gradi
 
 This is done by detecting creating a second matrix that corresponds to the image, but with a binary bit that indicates if the value in the image passes a provided threshold or not. This secondary image is then alpha blended into the original image.
 
-The result is an image where darker areas are darker and brighter areas are darker, increasing the local gradient.
+The result is an image where darker areas are darker and brighter areas are brighter, increasing the local gradient.
 ![contrast adjusted][image4]
 
 ##### 3.- Noise reduction
