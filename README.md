@@ -1,102 +1,77 @@
 #**Finding Lane Lines on the Road** 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
-<img src="laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
+##By Heron Ordonez
 
-Overview
 ---
 
-When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
+**Finding Lane Lines on the Road**
 
-In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
+The goals / steps of this project are the following:
+* Make a pipeline that finds lane lines on the road
+* Use the same pipeline to process images and videos
 
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
-
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
-
-
-Creating a Great Writeup
----
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
-1. Describe the pipeline
-2. Identify any shortcomings
-3. Suggest possible improvements
-
-We encourage using images in your writeup to demonstrate how your pipeline works.  
-
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
-
-
-The Project
+[image1]: ./test_images/processed_solidYellowCurve2 "Sample Processed Image"
+[image2]: /writeup/pipeline_process.jpeg "Transformation of the image through the pipeline"
+[image3]: /writeup/gray.jpg "Image transformed to grayscale"
+[image4]: /writeup/contrast_adjust.jpg "Contrast adjusted image"
+[image5]: /writeup/canny_img.jpg "Canny transform for edge detection"
+[image6]: /writeup/masked_img.jpg "Region of interest mask applied to Canny transformed image"
+[image7]: /writeup/hough_img.jpg "Hough lines plotted"
+[image8]: /writeup/classified_img.jpg "Resulting lines from averaging the extended Hough lines to the edges of the region of interest"
+[image9]: /writeup/overlay.jpg "Final result"
 ---
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you can install the starter kit or follow the install instructions below to get started on this project. ##
+### Reflection
 
-**Step 1:** Getting setup with Python
+###1. The pipeline is based around the Hough Transform, where multiple points are converted into lines from an image.
+The pipeline is basically preparing the image to make the Hough Transform as effective as possible in matching the lane lines and then merging the results into a single line that is then overlaid on the original image.
 
-To do this project, you will need Python 3 along with the numpy, matplotlib, and OpenCV libraries, as well as Jupyter Notebook installed. 
+The process for videos is to first break up the video in individual frames and then process each frame as a static image independently.
 
-We recommend downloading and installing the Anaconda Python 3 distribution from Continuum Analytics because it comes prepackaged with many of the Python dependencies you will need for this and future projects, makes it easy to install OpenCV, and includes Jupyter Notebook.  Beyond that, it is one of the most common Python distributions used in data analytics and machine learning, so a great choice if you're getting started in the field.
+![pipeline transformations][image1]
 
-Choose the appropriate Python 3 Anaconda install package for your operating system <A HREF="https://www.continuum.io/downloads" target="_blank">here</A>.   Download and install the package.
+#### The pipeline process
+In order to make the Hough Transform effective in an image it needs to first be simplified:
+*first the image needs to be converted into grayscale color space
+    This allows the image to be represented in a bidimensional matrix instead of a tridimensional one.
+![grayscale][image3]
+*second the contrast of the image needs to be increased
+    In preparation for the next step, a higher contrast means for a more steep gradient field across the image.
+    This is done by detecting creating a second matrix that corresponds to the image, but with a binary bit that indicates if the value in the image passes a provided threshold or not. This secondary image is then alpha blended into the original image.
+    The result is an image where darker areas are darker and brighter areas are darker, increasing the local gradient.
+![contrast adjusted][image4]
+*third the noise in the image is reduced using the gaussian blur. This is done to improve the accuracy of the Canny transform.
 
-If you already have Anaconda for Python 2 installed, you can create a separate environment for Python 3 and all the appropriate dependencies with the following command:
+*fourth the image is passed through the Canny transform to detect where the local gradient is greater, detecting points where edges are more likely to be present.
+![canny transform][image5]
+*fifth an image mask is applied, leaving information only in a relevant area of interest. This step can not be applied before the canny transform to reduce the information that has to be processed,  this is because the gradient between the mask and the rest of the image would be detected as an edge by the Canny transform.
+![masked image][image6]
+*sixth The Hough transform is used from the image, resulting in a list of (x1, y1, x2, y2) points representing start and end points of lines.
+![hough lines][image7]
+*sixth the Hough Lines are passed to a detection function that simplifies the lines in a few steps:
+   +Line slopes are calculated and if the slope is not a real number the line is removed form the set.
+   +Lines are extended to the approximate edges of the relevant area mask, using the single point and slope equation.
+   The form of this new lines is in the form of (x3, y3, x4, y4) where x3 and x4 represent the value where the edges of the area of interest will be.
+   In this way, the only values that we have now are y3 and y4, representing where the Hough lines would intersect the edges of the area of interest.
+   +Lines are sorted by the sign of their slope, as lines along the same lane edge will have to have the same approximate slope.
+   +Finally, values for each line group are calculated, since x3 and x4 are always given they will always retain their values, but he values of y3 will be averaged to find one point at x3 and y4 will be averaged to find a second point at x4.
+   +using (x3, y3avt, x4, y4avg) for each group we now have 2 lines that most likely match the edges of the lane.
+![average lines][image8]
+*seventh a new image is drawn with these new lines in different colors and blended over the original image for the final result
 
-`>  conda create --name=yourNewEnvironment python=3 anaconda`
+![final result][image9]
 
-`>  source activate yourNewEnvironment`
 
-**Step 2:** Installing OpenCV
+###2. Some shortcomings with the current implementatipon
 
-Once you have Anaconda installed, first double check you are in your Python 3 environment:
+There are many shortcomings in this pipeline, as can be seen from the results in the videos:
+- Lines jump from one frame to the next when contrast changes
+- Different shades of the same color can throw the line off
+- Sometimes only one edge is detected
 
-`>python`    
-`Python 3.5.2 |Anaconda 4.1.1 (x86_64)| (default, Jul  2 2016, 17:52:12)`  
-`[GCC 4.2.1 Compatible Apple LLVM 4.2 (clang-425.0.28)] on darwin`  
-`Type "help", "copyright", "credits" or "license" for more information.`  
-`>>>`   
-(Ctrl-d to exit Python)
+###3. Possible improvements
 
-run the following commands at the terminal prompt to get OpenCV:
-
-`> pip install pillow`  
-`> conda install -c menpo opencv3=3.1.0`
-
-then to test if OpenCV is installed correctly:
-
-`> python`  
-`>>> import cv2`  
-`>>>`  (i.e. did not get an ImportError)
-
-(Ctrl-d to exit Python)
-
-**Step 3:** Installing moviepy  
-
-We recommend the "moviepy" package for processing video in this project (though you're welcome to use other packages if you prefer).  
-
-To install moviepy run:
-
-`>pip install moviepy`  
-
-and check that the install worked:
-
-`>python`  
-`>>>import moviepy`  
-`>>>`  (i.e. did not get an ImportError)
-
-(Ctrl-d to exit Python)
-
-**Step 4:** Opening the code in a Jupyter Notebook
-
-You will complete this project in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out <A HREF="https://www.packtpub.com/books/content/basics-jupyter-notebook-and-python" target="_blank">Cyrille Rossant's Basics of Jupyter Notebook and Python</A> to get started.
-
-Jupyter is an ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, run the following command at the terminal prompt (be sure you're in your Python 3 environment!):
-
-`> jupyter notebook`
-
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
-
-**Step 5:** Complete the project and submit both the Ipython notebook and the project writeup
-
+A few things to try to improve accuracy:
+-Use the previous frames as reference for where the lane edge is and smooth over videos.
+-Use a different approximation for the edges instead of a simple average
+-Use color selection before the transformation to allow the edges of the lines to be clearer.
