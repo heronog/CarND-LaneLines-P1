@@ -64,6 +64,7 @@ The Hough lines are passed to a function that simplifies the lines in a few step
 - Lines are sorted by the sign of their slope, as lines along the same lane edge will have to have the same approximate slope.
 - Finally, values for each line group are calculated, since _x3_ and _x4_ are always given they will always retain their values, but he values of y3 will be averaged to find one point at _x3_ and _y4_ will be averaged to find a second point at _x4_.
 - Using _(x3, y3<sup>avg</sup>, x4, y4<sup>avg</sup>)_ for each group we now have 2 lines that most likely match the edges of the lane.
+
 ![average lines][image8]
 
 ##### 8.- Final result
