@@ -52,18 +52,20 @@ In order to make the Hough Transform effective in an image it needs to first be 
 ![masked image][image6]
 
 ##### sixth The Hough transform is used
-from the image, resulting in a list of (x1, y1, x2, y2) points representing start and end points of lines.
+    from the image, resulting in a list of (x1, y1, x2, y2) points representing start and end points of lines.
 ![hough lines][image7]
 
-##### seventh the Hough Lines are passed to a detection function that simplifies the lines in a few steps:
-   +Line slopes are calculated and if the slope is not a real number the line is removed form the set.
-   +Lines are extended to the approximate edges of the relevant area mask, using the single point and slope equation.
-   The form of this new lines is in the form of (x3, y3, x4, y4) where x3 and x4 represent the value where the edges of the area of interest will be.
-   In this way, the only values that we have now are y3 and y4, representing where the Hough lines would intersect the edges of the area of interest.
-   +Lines are sorted by the sign of their slope, as lines along the same lane edge will have to have the same approximate slope.
-   +Finally, values for each line group are calculated, since x3 and x4 are always given they will always retain their values, but he values of y3 will be averaged to find one point at x3 and y4 will be averaged to find a second point at x4.
-   +using (x3, y3avt, x4, y4avg) for each group we now have 2 lines that most likely match the edges of the lane.
+##### seventh the Hough Lines are passed to a detection function
+    that simplifies the lines in a few steps:
+       -Line slopes are calculated and if the slope is not a real number the line is removed form the set.
+       -Lines are extended to the approximate edges of the relevant area mask, using the single point and slope equation.
+           The form of this new lines is in the form of (x3, y3, x4, y4) where x3 and x4 represent the value where the edges of the area of interest will be.
+           In this way, the only values that we have now are y3 and y4, representing where the Hough lines would intersect the edges of the area of interest.
+       -Lines are sorted by the sign of their slope, as lines along the same lane edge will have to have the same approximate slope.
+       -Finally, values for each line group are calculated, since x3 and x4 are always given they will always retain their values, but he values of y3 will be averaged to find one point at x3 and y4 will be averaged to find a second point at x4.
+       -using (x3, y3avt, x4, y4avg) for each group we now have 2 lines that most likely match the edges of the lane.
 ![average lines][image8]
+
 ###### eight a new image is drawn with these new lines in different colors and blended over the original image for the final result
 
 ![final result][image9]
