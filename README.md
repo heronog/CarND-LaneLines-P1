@@ -66,7 +66,7 @@ The Hough lines are passed to a function that simplifies the lines in a few step
 - Using _(x3, y3<sup>avg</sup>, x4, y4<sup>avg</sup>)_ for each group we now have 2 lines that most likely match the edges of the lane.
 ![average lines][image8]
 
-###### 8.- Final result
+##### 8.- Final result
 A new image is drawn with the new lines in different colors and blended over the original image for the final result.
 
 ![final result][image9]
