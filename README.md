@@ -27,7 +27,6 @@ The pipeline is based around the Hough Transform, where multiple points are conv
 The process for videos is to first break up the video in individual frames and then process each frame as a static image independently.
 
 #### The pipeline process
-In order to make the Hough Transform effective in an image it needs to first be simplified:
 ##### 1.- The image is converted into grayscale color space
 This allows the image to be represented in a bidimensional matrix instead of a tridimensional one.
 ![grayscale][image3]
